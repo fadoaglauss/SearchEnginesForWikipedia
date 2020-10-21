@@ -1,4 +1,4 @@
-from IPython.display import clear_output
+
 from typing import List, Set, Union
 from abc import abstractmethod
 from functools import total_ordering
@@ -13,22 +13,24 @@ class Index:
         self.set_documents = set()
 
     def index(self, term:str, doc_id:int, term_freq:int):
+        int_term_id = 0
         if term not in self.dic_index:
-            int_term_id = None
+            int_term_id = 1
             self.dic_index[term] = self.create_index_entry(int_term_id)
         else:
-            int_term_id = None
+            int_term_id = self.get_term_id(term)
 
         self.add_index_occur(self.dic_index[term], doc_id, int_term_id, term_freq)
+        self.set_documents.add(term)
 
 
     @property
     def vocabulary(self) -> List:
-        return []
+        return self.dic_index.keys()
 
     @property
     def document_count(self) -> int:
-        return 0
+        return len(self.set_documents)
 
     @abstractmethod
     def get_term_id(self, term:str):
@@ -77,10 +79,19 @@ class TermOccurrence:
     def __hash__(self):
     	return hash((self.doc_id,self.term_id))
     def __eq__(self,other_occurrence:"TermOccurrence"):
-        return False
+        if other_occurrence is None:
+            return False
+        return (self.doc_id == other_occurrence.doc_id and self.term_id == other_occurrence.term_id)
 
     def __lt__(self,other_occurrence:"TermOccurrence"):
-        return False
+        if other_occurrence is None:
+            return True
+        if self.term_id < other_occurrence.term_id:
+            return True
+        elif self.term_id == other_occurrence.term_id:
+            return self.doc_id < other_occurrence.doc_id
+        else:
+            return False
 
     def __str__(self):
         return f"(term_id:{self.term_id} doc: {self.doc_id} freq: {self.term_freq})"
@@ -95,15 +106,19 @@ class HashIndex(Index):
         return self.dic_index[term][0].term_id
 
     def create_index_entry(self, termo_id:int) -> List:
-        return None
+        return []
 
     def add_index_occur(self, entry_dic_index:List[TermOccurrence], doc_id:int, term_id:int, term_freq:int):
-        entry_dic_index.append(None)
+        entry_dic_index.append(TermOccurrence(doc_id,term_id,term_freq))
 
     def get_occurrence_list(self,term: str)->List:
+        if term in self.dic_index:
+            return self.dic_index[term]
         return []
 
     def document_count_with_term(self,term:str) -> int:
+        if term in self.dic_index:
+            return len(self.dic_index[term])
         return 0
 
 
