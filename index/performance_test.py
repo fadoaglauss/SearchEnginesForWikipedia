@@ -1,4 +1,3 @@
-from IPython.display import clear_output
 from index.structure import *
 
 from datetime import datetime

@@ -74,7 +74,10 @@ class TermOccurrence:
         self.term_freq = term_freq
 
     def write(self, idx_file):
-        pass
+        idx_file.write(self.doc_id.to_bytes(4,byteorder="big"))
+        idx_file.write(self.term_id.to_bytes(4,byteorder="big"))
+        idx_file.write(self.term_freq.to_bytes(4,byteorder="big"))
+       
 
     def __hash__(self):
     	return hash((self.doc_id,self.term_id))
@@ -147,7 +150,7 @@ class FileIndex(Index):
 
         self.lst_occurrences_tmp = []
         self.idx_file_counter = 0
-        self.str_idx_file_name = "occur_idx_file"
+        self.str_idx_file_name = None
 
     def get_term_id(self, term:str):
         return self.dic_index[term].term_id
@@ -160,19 +163,29 @@ class FileIndex(Index):
 
         if len(self.lst_occurrences_tmp) >= FileIndex.TMP_OCCURRENCES_LIMIT:
             self.save_tmp_occurrences()
+    def incress_idx_file_counter(self):
+        self.idx_file_counter = self.idx_file_counter + 1
 
     def next_from_list(self) -> TermOccurrence:
-        return None
+        try:
+            next_element = self.lst_occurrences_tmp.pop(0)
+            if not next_element:
+                return None
+            return next_element
+        except:            
+            return None
 
     def next_from_file(self,file_idx) -> TermOccurrence:
             #next_from_file = pickle.load(file_idx)
-        bytes_doc_id = file_idx.read(4)
-        if not bytes_doc_id:
-            return None
+    
         #seu código aqui :)
-
-        return TermOccurrence(doc_id, term_id, term_freq)
-
+        try:
+            next_occurrence = pickle.load(file_idx)
+            if not next_occurrence:
+                return None
+            return TermOccurrence(next_occurrence.doc_id, next_occurrence.term_id, next_occurrence.term_freq)
+        except:
+            return None
 
     def save_tmp_occurrences(self):
 
@@ -180,17 +193,33 @@ class FileIndex(Index):
         #Para eficiencia, todo o codigo deve ser feito com o garbage
         #collector desabilitado
         gc.disable()
-
-        #ordena pelo term_id, doc_id
-        
-        
+        #ordena pelo term_id, doc_id        
         ### Abra um arquivo novo faça a ordenação externa: compar sempre a primeira posição
         ### da lista com a primeira possição do arquivo usando os métodos next_from_list e next_from_file
         ### para armazenar no novo indice ordenado
+        filename = ""
+        if self.str_idx_file_name == None:
+            filename = f"occur_index_{self.idx_file_counter}.idx"
+        else:
+            filename = self.str_idx_file_name
+        self.incress_idx_file_counter()
+        self.str_idx_file_name  = f"occur_index_{self.idx_file_counter}.idx"
+        while len(self.lst_occurrences_tmp)>0: 
+            with open(filename,"wb") as idx_file:
+                with open(self.str_idx_file_name,"wb") as new_idx_file:
+                    occur_file = self.next_from_file(idx_file)
+                    occur_list = self.next_from_list()
+                    if occur_file < occur_list:
+                        next_save = occur_file
+                        occur_file = self.next_from_file(idx_file)
+                    else:
+                        next_save = occur_list
+                        occur_list = self.next_from_list()
+                    next_save.write(new_idx_file)
 
-
-
+        self.save_tmp_occurrences = []
         gc.enable()
+        print(f"{self.str_idx_file_name}")
 
     def finish_indexing(self):
         if len(self.lst_occurrences_tmp) > 0:
