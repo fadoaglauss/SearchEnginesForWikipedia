@@ -5,8 +5,8 @@ import math
 import tracemalloc
 import unittest
 from random import randrange,seed
-
-
+from IPython.core.display import clear_output
+from humanfriendly import format_number
 
 
 
@@ -33,9 +33,9 @@ class PerformanceTest(unittest.TestCase):
         current, peak = tracemalloc.get_traced_memory()
 
         clear_output(wait=True)
-        print(format_num(f"Memoria usada: {current / 10**6:,} MB; Máximo {peak / 10**6:,} MB"),flush=True)
-        print(format_num(f"Indexando ocorrencia #{count:,}/{total:,} ({porc_complete}%)"),flush=True)
-        print(format_num(f"Tempo gasto: {delta.total_seconds()}s"),flush=True)
+        print(f"Memoria usada: {current / 10**6:,} MB; Máximo {peak / 10**6:,} MB",flush=True)
+        print(f"Indexando ocorrencia #{count:,}/{total:,} ({porc_complete}%)",flush=True)
+        print(f"Tempo gasto: {delta.total_seconds()}s",flush=True)
 
     def index_words(self):
         count = 0
