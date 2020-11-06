@@ -15,7 +15,7 @@ class Cleaner:
         in_table =  "áéíóúâêôçãẽõü"
         out_table = "aeiouaeocaeou"
         #altere a linha abaixo para remoção de acentos (Atividade 11)
-        self.accents_translation_table = None
+        self.accents_translation_table = str.maketrans(in_table,out_table)
         self.set_punctuation = set(string.punctuation)
 
         #flags
@@ -24,7 +24,8 @@ class Cleaner:
         self.perform_stemming = perform_stemming
 
     def html_to_plain_text(self,html_doc:str) ->str:
-        return None
+        soup = BeautifulSoup(html_doc, 'html.parser')
+        return soup.get_text()
 
     def read_stop_words(self,str_file):
         set_stop_words = set()
@@ -33,15 +34,18 @@ class Cleaner:
                 arr_words = line.split(",")
                 [set_stop_words.add(word) for word in arr_words]
         return set_stop_words
+    
     def is_stop_word(self,term:str):
-        return True
+        if term in self.set_stop_words:
+            return True
+        return False
 
     def word_stem(self,term:str):
-        return ""
+        return self.stemmer.stem(term)
 
 
     def remove_accents(self,term:str) ->str:
-        return None
+        return self.accents_translation_table.translate(term)
 
 
     def preprocess_word(self,term:str) -> str:
