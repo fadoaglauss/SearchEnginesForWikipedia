@@ -5,8 +5,6 @@ import math
 import tracemalloc
 import unittest
 from random import randrange,seed
-from IPython.core.display import clear_output
-from humanfriendly import format_number
 
 
 

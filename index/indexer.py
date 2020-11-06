@@ -3,19 +3,22 @@ from bs4 import BeautifulSoup
 import string
 from nltk.tokenize import word_tokenize
 import os
+from nltk.corpus import stopwords
+import nltk
 
 
 class Cleaner:
     def __init__(self,stop_words_file:str,language:str,
                         perform_stop_words_removal:bool,perform_accents_removal:bool,
                         perform_stemming:bool):
-        self.set_stop_words = self.read_stop_words(stop_words_file)
-
+        #self.set_stop_words = self.read_stop_words(stop_words_file)
+        nltk.download('stopwords')
+        self.set_stop_words = set(stopwords.words('portuguese'))
         self.stemmer = SnowballStemmer(language)
         in_table =  "áéíóúâêôçãẽõü"
         out_table = "aeiouaeocaeou"
         #altere a linha abaixo para remoção de acentos (Atividade 11)
-        self.accents_translation_table = str.maketrans(in_table,out_table)
+        self.accents_translation_table = in_table.maketrans(in_table,out_table)
         self.set_punctuation = set(string.punctuation)
 
         #flags
@@ -36,6 +39,7 @@ class Cleaner:
         return set_stop_words
     
     def is_stop_word(self,term:str):
+        
         if term in self.set_stop_words:
             return True
         return False
@@ -45,7 +49,7 @@ class Cleaner:
 
 
     def remove_accents(self,term:str) ->str:
-        return self.accents_translation_table.translate(term)
+        return term.translate(self.accents_translation_table)
 
 
     def preprocess_word(self,term:str) -> str:
