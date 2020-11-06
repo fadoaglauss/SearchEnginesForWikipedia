@@ -53,10 +53,18 @@ class Cleaner:
 
 
     def preprocess_word(self,term:str) -> str:
-
-        return None
-
-
+        term = term.lower()
+        if self.perform_stop_words_removal is True and self.is_stop_word(term):
+            term = ""
+            
+        if self.perform_accents_removal is True:
+            term = self.remove_accent(term)
+            if term_not_accent != "":
+        
+        if self.perform_stemming is True:
+            term = self.word_stem(term)
+        
+        return term
 
 class HTMLIndexer:
     cleaner = Cleaner(stop_words_file="stopwords.txt",
