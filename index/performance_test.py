@@ -5,9 +5,7 @@ import math
 import tracemalloc
 import unittest
 from random import randrange,seed
-
-
-
+from IPython.display import clear_output
 
 class PerformanceTest(unittest.TestCase):
     NUM_DOCS = 2000

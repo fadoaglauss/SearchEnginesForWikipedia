@@ -13,10 +13,11 @@ class Cleaner:
                         perform_stemming:bool):
         #self.set_stop_words = self.read_stop_words(stop_words_file)
         nltk.download('stopwords')
+        nltk.download('punkt')
         self.set_stop_words = set(stopwords.words('portuguese'))
         self.stemmer = SnowballStemmer(language)
-        in_table =  "áéíóúâêôçãẽõü"
-        out_table = "aeiouaeocaeou"
+        in_table =  "áéíóúâêôçãẽõü!?.:;,"
+        out_table = "aeiouaeocaeou      "
         #altere a linha abaixo para remoção de acentos (Atividade 11)
         self.accents_translation_table = in_table.maketrans(in_table,out_table)
         self.set_punctuation = set(string.punctuation)
@@ -58,8 +59,7 @@ class Cleaner:
             term = ""
             
         if self.perform_accents_removal is True:
-            term = self.remove_accent(term)
-            if term_not_accent != "":
+            term = self.remove_accents(term)
         
         if self.perform_stemming is True:
             term = self.word_stem(term)
@@ -67,22 +67,41 @@ class Cleaner:
         return term
 
 class HTMLIndexer:
+    
     cleaner = Cleaner(stop_words_file="stopwords.txt",
                         language="portuguese",
-                        perform_stop_words_removal=True,
+                        perform_stop_words_removal=False,
                         perform_accents_removal=True,
                         perform_stemming=True)
+    
     def __init__(self,index):
         self.index = index
 
     def text_word_count(self,plain_text:str):
+        text_tokenized = nltk.word_tokenize(plain_text)
         dic_word_count = {}
-
+        for word in text_tokenized:
+            word = self.cleaner.preprocess_word(word)
+            if word != "" and word != " ":
+                if word in dic_word_count:
+                    dic_word_count[word] = dic_word_count[word] + 1
+                else:
+                    dic_word_count[word] = 1
         return dic_word_count
+    
     def index_text(self,doc_id:int, text_html:str):
-        pass
+        text_plain = HTMLIndexer.cleaner.html_to_plain_text(text_html)
+        dic_text = self.text_word_count(text_plain)
+        for term in dic_text:
+            self.index.index(term,doc_id,dic_text[term])
+        
 
     def index_text_dir(self,path:str):
 
         for str_sub_dir in os.listdir(path):
             path_sub_dir = f"{path}/{str_sub_dir}"
+            for str_file in os.listdir(path_sub_dir):
+                filename = f"{path_sub_dir}/{str_file}"
+                with open(filename,"rb") as file:
+                    self.index_text(int((str_file.split("."))[0]),file)
+                    
