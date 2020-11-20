@@ -7,7 +7,6 @@ import os
 import pickle
 import gc
 
-
 class Index:
     def __init__(self):
         self.dic_index = {}
