@@ -1,30 +1,27 @@
-from nltk.stem.snowball import SnowballStemmer
-from bs4 import BeautifulSoup
-import string
-from nltk.tokenize import word_tokenize
 import os
-from nltk.corpus import stopwords
-import nltk
+import string
 from datetime import datetime
+from bs4 import BeautifulSoup
+
+import nltk
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+from nltk.stem.snowball import SnowballStemmer
+
+nltk.download('stopwords')
+nltk.download('punkt')
 
 
 class Cleaner:
     def __init__(self, stop_words_file: str, language: str,
                  perform_stop_words_removal: bool, perform_accents_removal: bool,
                  perform_stemming: bool):
-        #self.set_stop_words = self.read_stop_words(stop_words_file)
-        nltk.download('stopwords')
-        nltk.download('punkt')
         self.set_stop_words = set(stopwords.words('portuguese'))
         self.stemmer = SnowballStemmer(language)
-        in_table = "áéíóúâêôçãẽõü!?.:;,"
-        out_table = "aeiouaeocaeou      "
-        # altere a linha abaixo para remoção de acentos (Atividade 11)
-        self.accents_translation_table = in_table.maketrans(
-            in_table, out_table)
+        self.accents_translation_table = "áéíóúâêôçãẽõü!?.:;,".maketrans(
+            "áéíóúâêôçãẽõü!?.:;,", "aeiouaeocaeou      ")
         self.set_punctuation = set(string.punctuation)
-
-        # flags
+        
         self.perform_stop_words_removal = perform_stop_words_removal
         self.perform_accents_removal = perform_accents_removal
         self.perform_stemming = perform_stemming
@@ -79,7 +76,7 @@ class HTMLIndexer:
         self.index = index
 
     def text_word_count(self, plain_text: str):
-        text_tokenized = nltk.word_tokenize(plain_text)
+        text_tokenized = word_tokenize(plain_text)
         dic_word_count = {}
         for word in text_tokenized:
             word = self.cleaner.preprocess_word(word)

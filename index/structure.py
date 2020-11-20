@@ -1,11 +1,10 @@
-
-from typing import List, Set, Union
-from abc import abstractmethod
-from functools import total_ordering
-from os import path
 import os
-import pickle
 import gc
+import pickle
+from abc import abstractmethod
+from typing import List, Set, Union
+from functools import total_ordering
+
 
 class Index:
     def __init__(self):
@@ -133,7 +132,6 @@ class TermFilePosition:
     def __init__(self, term_id: int,  term_file_start_pos: int = None, doc_count_with_term: int = None):
         self.term_id = term_id
 
-        # a serem definidos após a indexação
         self.term_file_start_pos = term_file_start_pos
         self.doc_count_with_term = doc_count_with_term
 
@@ -181,9 +179,6 @@ class FileIndex(Index):
             return None
 
     def next_from_file(self, file_idx) -> TermOccurrence:
-        #next_from_file = pickle.load(file_idx)
-
-        # seu código aqui :)
         try:
             next_occurrence = pickle.load(file_idx)
             if not next_occurrence:
@@ -193,15 +188,8 @@ class FileIndex(Index):
             return None
 
     def save_tmp_occurrences(self):
-
-        # ordena pelo term_id, doc_id
-        # Para eficiencia, todo o codigo deve ser feito com o garbage
-        # collector desabilitado
+        # Para eficiencia, o garbage collector está desabilitado
         gc.disable()
-        # ordena pelo term_id, doc_id
-        # Abra um arquivo novo faça a ordenação externa: compar sempre a primeira posição
-        # da lista com a primeira possição do arquivo usando os métodos next_from_list e next_from_file
-        # para armazenar no novo indice ordenado
 
         self.lst_occurrences_tmp.sort()
         filename = ""
@@ -227,21 +215,18 @@ class FileIndex(Index):
                 next_save.write(new_idx_file)
         self.lst_occurrences_tmp = []
         idx_file.close()
+
         gc.enable()
 
     def finish_indexing(self):
         if len(self.lst_occurrences_tmp) > 0:
             self.save_tmp_occurrences()
 
-        # Sugestão: faça a navegação e obetenha um mapeamento
-        # id_termo -> obj_termo armazene-o em dic_ids_por_termo
         dic_ids_por_termo = {}
         for str_term, obj_term in self.dic_index.items():
             dic_ids_por_termo[obj_term.term_id] = str_term
         lst_discovery_id = {}
         with open(self.str_idx_file_name, 'rb') as idx_file:
-            # navega nas ocorrencias para atualizar cada termo em dic_ids_por_termo
-            # apropriadamente
             occur_file = self.next_from_file(idx_file)
             int_size_of_occur = idx_file.tell()
             while occur_file != None:
