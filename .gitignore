@@ -130,3 +130,7 @@ dmypy.json
 
 #IDX Files
 *.idx
+
+#Past
+wikiSampleTest/
+wikiSample/

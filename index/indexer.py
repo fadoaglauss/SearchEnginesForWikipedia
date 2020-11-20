@@ -5,7 +5,7 @@ from nltk.tokenize import word_tokenize
 import os
 from nltk.corpus import stopwords
 import nltk
-
+from datetime import datetime
 
 class Cleaner:
     def __init__(self,stop_words_file:str,language:str,
@@ -97,11 +97,18 @@ class HTMLIndexer:
         
 
     def index_text_dir(self,path:str):
-
         for str_sub_dir in os.listdir(path):
             path_sub_dir = f"{path}/{str_sub_dir}"
             for str_file in os.listdir(path_sub_dir):
                 filename = f"{path_sub_dir}/{str_file}"
                 with open(filename,"rb") as file:
+                    time_first = datetime.now()
                     self.index_text(int((str_file.split("."))[0]),file)
+                    time_end = datetime.now()
+                    tempo_gasto = time_end-time_first
+                with open("tempos.txt","a",encoding="utf-8") as file:
+                    file.write(str_file+":")
+                    file.write(f"{tempo_gasto.total_seconds()}\n")
+                
+
                     
