@@ -52,9 +52,15 @@ with open("index.idx", "rb") as idx_file:
 
 #### Quais foram os principais desafios e soluções?
 
+A solução adotada foi indexar cada termo em memória principal, configurando o tamanho máximo de memória que poderia ser gasto durante esse processo. Quando a indexação passar esse limite, os dados são exportados e salvos em memória secundária, na estrutura de dicionário. A complexidade dessa solução se dá por conta da estrutura de dados escolhida, o dicionário, que possui manipulação mais complexa que, por exemplo, uma lista. A escolha da lista de stop words custou tempo e análise, além dos testes serem incompatíveis com os testes unitários dependendo do dataset de stop words utilizado. Essa escolha demandou uma análise detalhada dos testes até a conclusão de que se encontravam coerentes. Devido ao grnde volume de dados, tais testes se tornavam demasiadamente demorados, gastando horas ou até mais de um dia para terminarem.
+
 #### Qual é a vantagem/desvantagem das suas soluções sob as outras alternativas (por exemplo, uso do índice em memória principal vs. ocorrência de termos em memória secundária)? 
 
+A grande vantagem dessa solução é a capacidade de armazenamento, que se torna do tamanho da memória secundária. A indexação por blocos na memória principal também é mais simples que a indexação a cada palavra na mesma. Como desvantagem dessa solução temos a pesquisa lenta dos índices, já que o acesso em memória secundária demora mais que o acesso em memória principal.
+
 #### O que nós melhoramos no nosso código para diminuir o consumo de memória ou deixá-lo mais eficiente?
+
+Uma solução para diminuir esse tempo de espera é salvar os índices em uma estrutura de B-Tree, na qual cada nó guarda resultados de acordo com a letra inicial da palavra. Não necessariamente cada nó deve ter uma letra do alfabeto, mas um nó pode ter, por exemplo, um grupo de 3 letras. Exemplo: No primeiro nó as palavras iniciadas com "a", "b" e "c" são salvas. A recuperação e maniúlação de dados em tal árvore tem complexidade em função logarítmica.
 
 
 ### Técnica de *stemming*
